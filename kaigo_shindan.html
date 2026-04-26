@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>介護補助金セルフ診断｜うちの親はいくら取りこぼしてる？</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;700&display=swap');
+
+  :root {
+    --teal: #2D6A6A;
+    --teal-lt: #E8F4F4;
+    --teal-mid: #4A8A8A;
+    --orange: #C8621A;
+    --orange-lt: #FDF0E8;
+    --gold: #C8962A;
+    --gold-lt: #FFFBEE;
+    --dark: #1A1A1A;
+    --gray: #666666;
+    --gray-lt: #F5F5F5;
+    --white: #FFFFFF;
+    --warn: #E53E3E;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #F7F5F0;
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* ── ヘッダー ── */
+  .hero {
+    background: var(--teal);
+    padding: 48px 24px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    color: #CCE8E8;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(22px, 5vw, 30px);
+    color: #FFFFFF;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 span { color: #F0C060; }
+  .hero p {
+    color: #AADDDD;
+    font-size: 13px;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+  .progress-wrap {
+    margin: 28px auto 0;
+    max-width: 360px;
+    position: relative;
+    z-index: 1;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #AADDDD;
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #F0C060;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* ── メインコンテンツ ── */
+  .container {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 0 16px 80px;
+  }
+
+  /* ── ステップ ── */
+  .step {
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+  .step.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-top: 24px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .step-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--teal);
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .step-q {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.55;
+    color: var(--dark);
+    margin-bottom: 6px;
+  }
+  .step-sub {
+    font-size: 12px;
+    color: var(--gray);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  /* ── 選択肢ボタン ── */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1.5px solid #E5E5E5;
+    border-radius: 10px;
+    background: #FAFAFA;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    color: var(--dark);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.5;
+  }
+  .option-btn:hover {
+    border-color: var(--teal);
+    background: var(--teal-lt);
+  }
+  .option-btn.selected {
+    border-color: var(--teal);
+    background: var(--teal-lt);
+    color: var(--teal);
+    font-weight: 500;
+  }
+  .option-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: #EEEEEE;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .option-btn.selected .option-icon { background: rgba(45,106,106,0.15); }
+  .option-btn-label { flex: 1; }
+  .option-btn-sub {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  /* ── ナビボタン ── */
+  .nav-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .btn-back {
+    flex: 0 0 auto;
+    padding: 14px 20px;
+    border: 1.5px solid #DDDDDD;
+    border-radius: 10px;
+    background: transparent;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    color: var(--gray);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: var(--teal); color: var(--teal); }
+  .btn-next {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: var(--teal);
+    color: #FFFFFF;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .btn-next.enabled {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .btn-next:hover.enabled { background: var(--teal-mid); }
+
+  /* ── 結果画面 ── */
+  .result-hero {
+    background: linear-gradient(135deg, var(--teal) 0%, #1A4A4A 100%);
+    border-radius: 16px;
+    padding: 32px 24px;
+    margin-top: 24px;
+    text-align: center;
+    color: #FFFFFF;
+  }
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: #AADDDD;
+    margin-bottom: 8px;
+  }
+  .result-amount {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #F0C060;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .result-amount span { font-size: 20px; }
+  .result-caption {
+    font-size: 12px;
+    color: #AADDDD;
+    line-height: 1.6;
+  }
+
+  .result-seido {
+    margin-top: 20px;
+  }
+  .seido-header {
+    background: var(--teal);
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 8px 8px 0 0;
+    letter-spacing: 0.06em;
+  }
+  .seido-item {
+    background: #FFFFFF;
+    border-left: 3px solid var(--teal);
+    border-right: 1px solid #EEEEEE;
+    border-bottom: 1px solid #EEEEEE;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .seido-item:last-child { border-radius: 0 0 8px 8px; border-bottom: 1px solid #EEEEEE; }
+  .seido-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .seido-dot.orange { background: var(--orange); }
+  .seido-dot.gold { background: var(--gold); }
+  .seido-item-body {}
+  .seido-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 2px;
+  }
+  .seido-desc {
+    font-size: 11px;
+    color: var(--gray);
+    line-height: 1.6;
+  }
+  .seido-amount {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--orange);
+    margin-top: 4px;
+  }
+
+  .warn-box {
+    background: var(--orange-lt);
+    border: 1px solid var(--orange);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #5A2A00;
+  }
+  .warn-box strong { color: var(--orange); }
+
+  .cta-box {
+    background: var(--gold-lt);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 20px 16px;
+    margin-top: 16px;
+    text-align: center;
+  }
+  .cta-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 6px;
+  }
+  .cta-sub {
+    font-size: 12px;
+    color: var(--gray);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .cta-btn {
+    display: inline-block;
+    background: var(--teal);
+    color: #FFFFFF;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 14px 32px;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .cta-btn:hover { background: var(--teal-mid); }
+
+  .restart-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border: 1.5px solid #DDDDDD;
+    border-radius: 10px;
+    background: transparent;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    color: var(--gray);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .restart-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+  .note-text {
+    font-size: 10px;
+    color: #AAAAAA;
+    line-height: 1.7;
+    margin-top: 20px;
+    text-align: center;
+    padding: 0 8px;
+  }
+
+  .tag-warn {
+    display: inline-block;
+    background: #FFF0F0;
+    color: var(--warn);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">介護補助金セルフ診断</div>
+  <h1>うちの親は今<span>いくら</span><br>取りこぼしてる？</h1>
+  <p>要介護度・収入・状況を答えるだけで<br>使える制度と戻ってくる金額の目安がわかります</p>
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="step-label">STEP 1 / 5</span>
+      <span id="step-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STEP 1: 要介護度 -->
+  <div class="step active" id="step-1">
+    <div class="step-card">
+      <div class="step-num">STEP 1 ／ 5</div>
+      <div class="step-q">親の要介護度を教えてください</div>
+      <div class="step-sub">まだ認定を受けていない場合は「未申請」を選択してください</div>
+      <div class="options">
+        <button class="option-btn" data-step="1" data-val="none" onclick="select(this)">
+          <span class="option-icon">📋</span>
+          <span class="option-btn-label">まだ申請していない<span class="option-btn-sub">要介護認定を受けていない状態</span></span>
+        </button>
+        <button class="option-btn" data-step="1" data-val="1-2" onclick="select(this)">
+          <span class="option-icon">🟡</span>
+          <span class="option-btn-label">要支援1〜2 / 要介護1〜2<span class="option-btn-sub">日常生活に一部介助が必要</span></span>
+        </button>
+        <button class="option-btn" data-step="1" data-val="3-4" onclick="select(this)">
+          <span class="option-icon">🟠</span>
+          <span class="option-btn-label">要介護3〜4<span class="option-btn-sub">常時介護が必要な状態</span></span>
+        </button>
+        <button class="option-btn" data-step="1" data-val="5" onclick="select(this)">
+          <span class="option-icon">🔴</span>
+          <span class="option-btn-label">要介護5<span class="option-btn-sub">全面的な介助が必要な状態</span></span>
+        </button>
+      </div>
+      <div class="nav-row">
+        <button class="btn-next" id="next-1" onclick="goNext(2)">次へ　→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: 収入区分 -->
+  <div class="step" id="step-2">
+    <div class="step-card">
+      <div class="step-num">STEP 2 ／ 5</div>
+      <div class="step-q">親の年収・年金額の目安を教えてください</div>
+      <div class="step-sub">世帯収入によって自己負担の上限額が変わります</div>
+      <div class="options">
+        <button class="option-btn" data-step="2" data-val="low" onclick="select(this)">
+          <span class="option-icon">🟢</span>
+          <span class="option-btn-label">住民税非課税世帯<span class="option-btn-sub">年金のみで年収おおむね155万円以下など</span></span>
+        </button>
+        <button class="option-btn" data-step="2" data-val="mid" onclick="select(this)">
+          <span class="option-icon">🟡</span>
+          <span class="option-btn-label">年収目安 155〜370万円<span class="option-btn-sub">一般的な年金受給者の多くがここに該当</span></span>
+        </button>
+        <button class="option-btn" data-step="2" data-val="high" onclick="select(this)">
+          <span class="option-icon">🟠</span>
+          <span class="option-btn-label">年収目安 370〜770万円<span class="option-btn-sub">現役並み所得に近い水準</span></span>
+        </button>
+        <button class="option-btn" data-step="2" data-val="vhigh" onclick="select(this)">
+          <span class="option-icon">🔴</span>
+          <span class="option-btn-label">年収目安 770万円以上<span class="option-btn-sub">現役並み所得区分</span></span>
+        </button>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goBack(1)">← 戻る</button>
+        <button class="btn-next" id="next-2" onclick="goNext(3)">次へ　→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: 在宅 or 施設 -->
+  <div class="step" id="step-3">
+    <div class="step-card">
+      <div class="step-num">STEP 3 ／ 5</div>
+      <div class="step-q">介護の状況を教えてください</div>
+      <div class="step-sub">在宅か施設かによって使える制度が変わります</div>
+      <div class="options">
+        <button class="option-btn" data-step="3" data-val="home" onclick="select(this)">
+          <span class="option-icon">🏠</span>
+          <span class="option-btn-label">在宅介護<span class="option-btn-sub">自宅で訪問介護・デイサービスなどを利用中</span></span>
+        </button>
+        <button class="option-btn" data-step="3" data-val="facility" onclick="select(this)">
+          <span class="option-icon">🏥</span>
+          <span class="option-btn-label">施設入所中<span class="option-btn-sub">老健・特養・有料老人ホームなど</span></span>
+        </button>
+        <button class="option-btn" data-step="3" data-val="hospital" onclick="select(this)">
+          <span class="option-icon">🚑</span>
+          <span class="option-btn-label">入院中 または 入院直後<span class="option-btn-sub">急性期・回復期の病院に入院している</span></span>
+        </button>
+        <button class="option-btn" data-step="3" data-val="start" onclick="select(this)">
+          <span class="option-icon">🌱</span>
+          <span class="option-btn-label">これから介護が始まる<span class="option-btn-sub">まだサービスを利用していない段階</span></span>
+        </button>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goBack(2)">← 戻る</button>
+        <button class="btn-next" id="next-3" onclick="goNext(4)">次へ　→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: 医療費 -->
+  <div class="step" id="step-4">
+    <div class="step-card">
+      <div class="step-num">STEP 4 ／ 5</div>
+      <div class="step-q">月々の医療費はどのくらいですか？</div>
+      <div class="step-sub">介護費と医療費を合算して計算できる制度があります</div>
+      <div class="options">
+        <button class="option-btn" data-step="4" data-val="none" onclick="select(this)">
+          <span class="option-icon">💊</span>
+          <span class="option-btn-label">ほとんどかかっていない<span class="option-btn-sub">月1万円未満</span></span>
+        </button>
+        <button class="option-btn" data-step="4" data-val="low" onclick="select(this)">
+          <span class="option-icon">💊</span>
+          <span class="option-btn-label">月1〜3万円程度<span class="option-btn-sub">通院・投薬が中心</span></span>
+        </button>
+        <button class="option-btn" data-step="4" data-val="high" onclick="select(this)">
+          <span class="option-icon">💊</span>
+          <span class="option-btn-label">月3万円以上<span class="option-btn-sub">入院・頻繁な通院など医療費が多い</span></span>
+        </button>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goBack(3)">← 戻る</button>
+        <button class="btn-next" id="next-4" onclick="goNext(5)">次へ　→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5: 申請状況 -->
+  <div class="step" id="step-5">
+    <div class="step-card">
+      <div class="step-num">STEP 5 ／ 5</div>
+      <div class="step-q">すでに申請・利用している制度はありますか？</div>
+      <div class="step-sub">当てはまるものをすべて選んでください（複数選択可）</div>
+      <div class="options" id="multi-options">
+        <button class="option-btn multi" data-val="kousetsu" onclick="toggleMulti(this)">
+          <span class="option-icon">✅</span>
+          <span class="option-btn-label">高額介護サービス費を申請済み</span>
+        </button>
+        <button class="option-btn multi" data-val="gosan" onclick="toggleMulti(this)">
+          <span class="option-icon">✅</span>
+          <span class="option-btn-label">高額医療・介護合算療養費を申請済み</span>
+        </button>
+        <button class="option-btn multi" data-val="shogai" onclick="toggleMulti(this)">
+          <span class="option-icon">✅</span>
+          <span class="option-btn-label">障害者控除対象者認定書を取得済み</span>
+        </button>
+        <button class="option-btn multi" data-val="omutsu" onclick="toggleMulti(this)">
+          <span class="option-icon">✅</span>
+          <span class="option-btn-label">おむつ使用証明書を取得・活用済み</span>
+        </button>
+        <button class="option-btn multi selected" data-val="nothing" onclick="toggleMulti(this)">
+          <span class="option-icon">❌</span>
+          <span class="option-btn-label">どれも申請・利用していない</span>
+        </button>
+      </div>
+      <div class="nav-row">
+        <button class="btn-back" onclick="goBack(4)">← 戻る</button>
+        <button class="btn-next enabled" id="next-5" onclick="showResult()">診断結果を見る　→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div class="step" id="step-result">
+    <div class="result-hero">
+      <div class="result-label">取りこぼしている可能性のある金額</div>
+      <div class="result-amount" id="result-amount"><span>年間</span> 0 <span>万円〜</span></div>
+      <div class="result-caption" id="result-caption"></div>
+    </div>
+    <div class="result-seido" id="result-seido"></div>
+    <div class="warn-box" id="result-warn"></div>
+    <div class="cta-box">
+      <div class="cta-title">詳しい申請方法が気になりますか？</div>
+      <div class="cta-sub">プロフィールのリンクから<br>「聞く順番ガイド」を無料でダウンロードできます。<br>窓口でそのまま使えるテンプレート付きです。</div>
+      <button class="cta-btn">📄 無料ガイドをダウンロードする</button>
+    </div>
+    <button class="restart-btn" onclick="restart()">🔄 もう一度診断する</button>
+    <div class="note-text">※この診断は目安です。実際の金額・対象条件は世帯状況や自治体によって異なります。詳細は市区町村・税務署・加入医療保険者にご確認ください。</div>
+  </div>
+
+</div>
+
+<script>
+  const answers = { 1: null, 2: null, 3: null, 4: null };
+  const multiSelected = new Set(['nothing']);
+
+  function select(btn) {
+    const step = btn.dataset.step;
+    document.querySelectorAll(`[data-step="${step}"]`).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    answers[step] = btn.dataset.val;
+    const nextBtn = document.getElementById(`next-${step}`);
+    if (nextBtn) nextBtn.classList.add('enabled');
+  }
+
+  function toggleMulti(btn) {
+    const val = btn.dataset.val;
+    if (val === 'nothing') {
+      multiSelected.clear();
+      multiSelected.add('nothing');
+      document.querySelectorAll('.multi').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    } else {
+      multiSelected.delete('nothing');
+      document.querySelector('[data-val="nothing"]').classList.remove('selected');
+      if (multiSelected.has(val)) {
+        multiSelected.delete(val);
+        btn.classList.remove('selected');
+      } else {
+        multiSelected.add(val);
+        btn.classList.add('selected');
+      }
+      if (multiSelected.size === 0) {
+        multiSelected.add('nothing');
+        document.querySelector('[data-val="nothing"]').classList.add('selected');
+      }
+    }
+  }
+
+  function goNext(stepNum) {
+    if (stepNum > 1 && !answers[stepNum - 1]) return;
+    const current = document.querySelector('.step.active');
+    current.classList.remove('active');
+    document.getElementById(`step-${stepNum}`).classList.add('active');
+    updateProgress(stepNum);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goBack(stepNum) {
+    const current = document.querySelector('.step.active');
+    current.classList.remove('active');
+    document.getElementById(`step-${stepNum}`).classList.add('active');
+    updateProgress(stepNum);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress(step) {
+    const total = 5;
+    const pct = Math.round(((step - 1) / total) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('step-label').textContent = `STEP ${step} / ${total}`;
+    document.getElementById('step-pct').textContent = pct + '%';
+  }
+
+  function showResult() {
+    const kaigo = answers[1];
+    const income = answers[2];
+    const situation = answers[3];
+    const medical = answers[4];
+    const applied = multiSelected;
+
+    let minAmt = 0;
+    let seidos = [];
+    let warns = [];
+
+    // ── 要介護度未申請 ──
+    if (kaigo === 'none') {
+      minAmt += 20;
+      seidos.push({
+        name: '要介護認定申請（最優先）',
+        desc: '申請日から効力が発生します。今すぐ申請することで介護保険サービス全体が使えるようになります。',
+        amount: '申請しないと他の制度がすべて使えません',
+        dot: 'orange',
+        urgent: true
+      });
+    }
+
+    // ── 高額介護サービス費 ──
+    if (!applied.has('kousetsu') && (kaigo === '1-2' || kaigo === '3-4' || kaigo === '5')) {
+      let kouAmt = 0;
+      if (income === 'low') kouAmt = 6;
+      else if (income === 'mid') kouAmt = 5;
+      else if (income === 'high') kouAmt = 4;
+      else kouAmt = 3;
+      minAmt += kouAmt;
+      seidos.push({
+        name: '高額介護サービス費',
+        desc: '月の自己負担が上限を超えた分が払い戻されます。「所得が多いと対象外」は誤解です。',
+        amount: `年間 ${kouAmt}万円前後が戻る可能性`,
+        dot: 'teal'
+      });
+    }
+
+    // ── 高額医療・介護合算 ──
+    if (!applied.has('gosan') && (medical === 'low' || medical === 'high') && (kaigo === '1-2' || kaigo === '3-4' || kaigo === '5')) {
+      let goAmt = 0;
+      if (medical === 'high') {
+        if (income === 'low') goAmt = 10;
+        else if (income === 'mid') goAmt = 8;
+        else goAmt = 5;
+      } else {
+        if (income === 'low') goAmt = 5;
+        else goAmt = 3;
+      }
+      minAmt += goAmt;
+      seidos.push({
+        name: '高額医療・高額介護合算療養費',
+        desc: '医療費と介護費を1年分まとめて計算し直す制度。窓口は「国保年金課」です（介護保険課ではありません）。',
+        amount: `年間 ${goAmt}万円以上戻る可能性`,
+        dot: 'orange'
+      });
+    }
+
+    // ── 障害者控除 ──
+    if (!applied.has('shogai') && (kaigo === '1-2' || kaigo === '3-4' || kaigo === '5')) {
+      let shogaiAmt = 0;
+      if (kaigo === '5' || kaigo === '3-4') shogaiAmt = 5;
+      else shogaiAmt = 3;
+      minAmt += shogaiAmt;
+      seidos.push({
+        name: '障害者控除対象者認定書',
+        desc: '要介護認定があれば身体障害者手帳なしで所得税・住民税の障害者控除が受けられます。申請先は「高齢福祉課」。',
+        amount: `年間 ${shogaiAmt}万円前後の節税効果`,
+        dot: 'gold'
+      });
+    }
+
+    // ── おむつ使用証明書 ──
+    if (!applied.has('omutsu') && (kaigo === '3-4' || kaigo === '5')) {
+      minAmt += 2;
+      seidos.push({
+        name: 'おむつ使用証明書 × 医療費控除',
+        desc: '主治医に証明書を書いてもらうだけでおむつ代が医療費控除の対象になります。介護窓口では案内されない税務署側の制度です。',
+        amount: '年間 1〜3万円の節税効果',
+        dot: 'teal'
+      });
+    }
+
+    // ── 入院直後 ──
+    if (situation === 'hospital') {
+      warns.push('<strong>⚠ 入院中の方は今すぐ動いてください</strong><br>「限度額適用認定証」を申請することで、窓口支払いを自己負担上限額に抑えられます。月をまたぐ前に申請することが重要です。');
+      seidos.unshift({
+        name: '限度額適用認定証（入院直後に必須）',
+        desc: '入院中に申請することで窓口支払いを上限額に抑えられます。月末入院ほど急いで申請を。国保は市区町村、社保は勤務先健保へ。',
+        amount: '数十万円の立替が不要になるケースも',
+        dot: 'orange',
+        urgent: true
+      });
+    }
+
+    // ── すでに全部申請済み ──
+    if (applied.has('kousetsu') && applied.has('gosan') && applied.has('shogai')) {
+      minAmt = Math.max(minAmt, 3);
+    }
+
+    // ── 金額が0のとき ──
+    if (minAmt === 0) minAmt = 5;
+
+    // ── 結果表示 ──
+    document.getElementById('result-amount').innerHTML = `<span>年間</span> ${minAmt} <span>万円〜</span>`;
+    document.getElementById('result-caption').innerHTML =
+      `取りこぼしている可能性がある制度が${seidos.length}つあります。<br>申請していないと、この金額が毎年そのままになります。`;
+
+    // 制度リスト
+    let seidoHTML = '<div class="seido-header">📋 申請をおすすめする制度</div>';
+    seidos.forEach(s => {
+      seidoHTML += `
+        <div class="seido-item">
+          <div class="seido-dot ${s.dot || 'teal'}"></div>
+          <div class="seido-item-body">
+            ${s.urgent ? '<span class="tag-warn">今すぐ必要</span><br>' : ''}
+            <div class="seido-name">${s.name}</div>
+            <div class="seido-desc">${s.desc}</div>
+            <div class="seido-amount">${s.amount}</div>
+          </div>
+        </div>`;
+    });
+    document.getElementById('result-seido').innerHTML = seidoHTML;
+
+    // 注意書き
+    let warnHTML = warns.length > 0
+      ? warns.join('<br><br>')
+      : '<strong>📌 申請のコツ</strong><br>制度ごとに担当窓口が異なります。「介護保険課に行けば全部わかる」は誤解です。まず「地域包括支援センター」で一覧の棚卸しを依頼するのが最短ルートです。';
+    document.getElementById('result-warn').innerHTML = warnHTML;
+
+    // 表示
+    document.querySelector('.step.active').classList.remove('active');
+    document.getElementById('step-result').classList.add('active');
+    document.getElementById('progress-fill').style.width = '100%';
+    document.getElementById('step-label').textContent = '診断完了';
+    document.getElementById('step-pct').textContent = '100%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function restart() {
+    Object.keys(answers).forEach(k => answers[k] = null);
+    multiSelected.clear();
+    multiSelected.add('nothing');
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelector('[data-val="nothing"]').classList.add('selected');
+    document.querySelectorAll('.btn-next:not(#next-5)').forEach(b => b.classList.remove('enabled'));
+    document.querySelector('.step.active').classList.remove('active');
+    document.getElementById('step-1').classList.add('active');
+    updateProgress(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
